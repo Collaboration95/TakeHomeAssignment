@@ -25,6 +25,7 @@
 import os
 import re
 import sys
+import uuid
 # SCONSTRUCT file interesting lines
 # config.version = Version(
 # major=15,
@@ -39,7 +40,7 @@ def update_file_version(filename,pattern,replacement, source_path):
 
     filepath = os.path.join(source_path,"develop","global","src",filename)
     # just following previous implementation
-    temp_fp = os.path.join(source_path, "develop", "global", "src", filename + "1") 
+    temp_fp = os.path.join(source_path, "develop", "global", "src", filename + str(uuid.uuid4())) 
 
     if not os.path.exists(filepath):
         print(f"Error: File not found: {filepath}")
