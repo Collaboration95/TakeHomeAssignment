@@ -34,11 +34,14 @@ import re
 
 def update_file_version(filename,pattern,replacement):
     """Update the build number in the file"""
-
-    filepath = os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct")
+    source_path = _check_source_path()
+    filepath = os.path.join(source_path,"develop","global","src",filename)
     # just following previous implementation
-    temp_fp = os.path.join(os.environ["SourcePath"], "develop", "global", "src", filename + "1") 
+    temp_fp = os.path.join(source_path, "develop", "global", "src", filename + "1") 
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"File {filepath} not found")
     os.chmod(filepath,0755)
+
     
     with open( filepath, 'r') as fin:
         with open(temp_fp, 'w') as fout:
@@ -48,29 +51,36 @@ def update_file_version(filename,pattern,replacement):
     
     os.remove(filepath)
     os.rename(temp_fp, filepath)
-    os.chmod(filepath, 0755)
+    
+def _check_build_number():
+    """Helper function to validate BuildNum variable"""
+    build_num = os.environ.get("BuildNum")
+    if not build_num:
+        raise ValueError("BuildNum environment variable is not set")
+    if not build_num.isdigit():
+        raise ValueError("BuildNum environment variable is not a number")
+    return build_num
 
+def _check_source_path():
+    """Helper function to validate SourcePath variable"""
+    source_path = os.environ.get("SourcePath")
+    if not source_path:
+        raise ValueError("SourcePath environment variable is not set")
+    return source_path
 
-def updateSconstruct():
+def updateSconstruct(build_num):
     "Update the build number in the SConstruct file"
-    update_file_version(
-        "SConstruct",
-        "point\=[\d]+",
-        "point="+os.environ["BuildNum"]
-    )
+    update_file_version("SConstruct", "point\=[\d]+", "point="+build_num)
     
 # ADLMSDK_VERSION_POINT=6
-def updateVersion():
+def updateVersion(build_num):
     "Update the build number in the VERSION file"
-    update_file_version(
-        "VERSION",
-        "ADLMSDK_VERSION_POINT=[\d]+",
-        "ADLMSDK_VERSION_POINT="+os.environ["BuildNum"]
-    )
+    update_file_version("VERSION", "ADLMSDK_VERSION_POINT=[\d]+", "ADLMSDK_VERSION_POINT="+build_num)
 
 
 def main():
-    updateSconstruct()
-    updateVersion()
+    build_num = _check_build_number()
+    updateSconstruct(build_num)
+    updateVersion(build_num)
 
 main()
