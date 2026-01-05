@@ -37,19 +37,18 @@ def update_file_version(filename,pattern,replacement):
 
     filepath = os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct")
     # just following previous implementation
-    temp_fp =  temp_filepath = os.path.join(os.environ["SourcePath"], "develop", "global", "src", filename + "1") 
+    temp_fp = os.path.join(os.environ["SourcePath"], "develop", "global", "src", filename + "1") 
     os.chmod(filepath,0755)
     
-    fin = open(filepath, 'r')
-    fout = open(temp_filepath, 'w')
-    for line in fin:
-        line = re.sub(pattern, replacement, line)
-        fout.write(line)
-    fin.close()
-    fout.close()
+    with open( filepath, 'r') as fin:
+        with open(temp_fp, 'w') as fout:
+            for line in fin:
+                line = re.sub(pattern, replacement, line)
+                fout.write(line)
     
     os.remove(filepath)
-    os.rename(temp_filepath, filepath)
+    os.rename(temp_fp, filepath)
+    os.chmod(filepath, 0755)
 
 
 def updateSconstruct():
@@ -60,7 +59,6 @@ def updateSconstruct():
         "point="+os.environ["BuildNum"]
     )
     
-# VERSION file interesting line
 # ADLMSDK_VERSION_POINT=6
 def updateVersion():
     "Update the build number in the VERSION file"
