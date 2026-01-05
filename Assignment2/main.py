@@ -1,7 +1,5 @@
 # Refactor code
-# -------------
-# Not timed (good to get it back within 24 hours)
-#
+
 # An intern has provided the code below to update the version number
 # within two different files.
 # The intern has left and you need to review and improve the code before
@@ -9,7 +7,6 @@
 #
 # Please do not be constrained by the existing code (i.e. you don't have
 # to keep the same function names, structure)
-# Aim for production quality 'best-practice/clean' code
 #
 # Original Requirements
 # ---------------------
@@ -34,36 +31,45 @@ import re
 # point=6,
 # patch=0
 #)
-def updateSconstruct():
-    "Update the build number in the SConstruct file"
-    os.chmod(os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct"), 0755)
-    fin = open(os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct"), 'r')
-    fout = open(os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct1"), 'w')
+
+def update_file_version(filename,pattern,replacement):
+    """Update the build number in the file"""
+
+    filepath = os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct")
+    # just following previous implementation
+    temp_fp =  temp_filepath = os.path.join(os.environ["SourcePath"], "develop", "global", "src", filename + "1") 
+    os.chmod(filepath,0755)
+    
+    fin = open(filepath, 'r')
+    fout = open(temp_filepath, 'w')
     for line in fin:
-        line=re.sub("point\=[\d]+","point="+os.environ["BuildNum"],line)
+        line = re.sub(pattern, replacement, line)
         fout.write(line)
     fin.close()
     fout.close()
-    os.remove(os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct"))
-    os.rename(os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct1"),
-    os.path.join(os.environ["SourcePath"],"develop","global","src","SConstruct"))
+    
+    os.remove(filepath)
+    os.rename(temp_filepath, filepath)
 
+
+def updateSconstruct():
+    "Update the build number in the SConstruct file"
+    update_file_version(
+        "SConstruct",
+        "point\=[\d]+",
+        "point="+os.environ["BuildNum"]
+    )
+    
 # VERSION file interesting line
 # ADLMSDK_VERSION_POINT=6
 def updateVersion():
     "Update the build number in the VERSION file"
+    update_file_version(
+        "VERSION",
+        "ADLMSDK_VERSION_POINT=[\d]+",
+        "ADLMSDK_VERSION_POINT="+os.environ["BuildNum"]
+    )
 
-    os.chmod(os.path.join(os.environ["SourcePath"],"develop","global","src","VERSION"), 0755)
-    fin = open(os.path.join(os.environ["SourcePath"],"develop","global","src","VERSION"), 'r')
-    fout = open(os.path.join(os.environ["SourcePath"],"develop","global","src","VERSION1"), 'w')
-    for line in fin:
-        line=re.sub("ADLMSDK_VERSION_POINT=[\d]+","ADLMSDK_VERSION_POINT="+os.environ["BuildNum"],line)
-        fout.write(line)
-    fin.close()
-    fout.close()
-    os.remove(os.path.join(os.environ["SourcePath"],"develop","global","src","VERSION"))
-    os.rename(os.path.join(os.environ["SourcePath"],"develop","global","src","VERSION1"),
-    os.path.join(os.environ["SourcePath"],"develop","global","src","VERSION"))
 
 def main():
     updateSconstruct()
