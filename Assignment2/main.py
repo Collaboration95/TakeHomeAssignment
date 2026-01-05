@@ -26,80 +26,88 @@ import os
 import re
 import sys
 import uuid
-# SCONSTRUCT file interesting lines
-# config.version = Version(
-# major=15,
-# minor=0,
-# point=6,
-# patch=0
-#)
+from dataclasses import dataclass
 
-def update_file_version(filename,pattern,replacement, source_path):
+
+@dataclass
+class Config:
+    source_path: str
+    source_dir: str  # computed property
+    build_num: str
+
+    def __post_init__(self):
+        self.source_dir = os.path.join(self.source_path, "develop", "global", "src")
+
+def update_file_version(filename,pattern,replacement, source_dir):
     """Update the build number in the file"""
     print(f"Updating file: {filename}")
 
-    filepath = os.path.join(source_path,"develop","global","src",filename)
+    filepath = os.path.join(source_dir,filename)
     # just following previous implementation
-    temp_fp = os.path.join(source_path, "develop", "global", "src", filename + str(uuid.uuid4())) 
+    temp_fp = os.path.join(source_dir, filename + str(uuid.uuid4())) 
 
     if not os.path.exists(filepath):
         print(f"Error: File not found: {filepath}")
         sys.exit(1)
     
     os.chmod(filepath,0o755)
+    try:
+        with open( filepath, 'r') as fin:
+            with open(temp_fp, 'w') as fout:
+                for line in fin:
+                    line = re.sub(pattern, replacement, line)
+                    fout.write(line)
+        
+        os.remove(filepath)
+        os.rename(temp_fp, filepath)
+        print(f"Successfully updated file: {filename}")
+    except Exception as e:
+        if os.path.exists(temp_fp):
+            os.remove(temp_fp)
+        print(f"Error updating file: {filename}. {e}")
+        sys.exit(1)
 
-    with open( filepath, 'r') as fin:
-        with open(temp_fp, 'w') as fout:
-            for line in fin:
-                line = re.sub(pattern, replacement, line)
-                fout.write(line)
+def updateSconstruct(config: Config):
+    "Update the build number in the SConstruct file"
+    update_file_version("SConstruct", "point\=[\d]+", "point="+config.build_num, config.source_dir)
     
-    os.remove(filepath)
-    os.rename(temp_fp, filepath)
-    print(f"Successfully updated file: {filename}")
-    
-def _check_build_number():
-    """Helper function to validate BuildNum variable"""
+# ADLMSDK_VERSION_POINT=6
+def updateVersion(config: Config):
+    "Update the build number in the VERSION file"
+    update_file_version("VERSION", "ADLMSDK_VERSION_POINT=[\d]+", "ADLMSDK_VERSION_POINT="+config.build_num, config.source_dir)
+
+def create_config() -> Config:
+    """Create and validate configuration from environment variables."""
     build_num = os.environ.get("BuildNum")
     if not build_num:
         raise ValueError("BuildNum environment variable is not set")
     if not build_num.isdigit():
-        raise ValueError("BuildNum environment variable is not a number")
-    print(f"Build number: {build_num}")
-    return build_num
-
-def _check_source_path():
-    """Helper function to validate SourcePath variable"""
+        raise ValueError(f"BuildNum must be a positive integer, got '{build_num}'")
+    # Validate Source path 
     source_path = os.environ.get("SourcePath")
     if not source_path:
         raise ValueError("SourcePath environment variable is not set")
     if not os.path.exists(source_path):
         raise FileNotFoundError(f"Source path {source_path} not found")
     if not os.path.isdir(source_path):
-        raise ValueError("SourcePath environment variable is not a directory")
-    print(f"Source path is validated : {source_path}")
-    return source_path
-
-def updateSconstruct(build_num, source_path):
-    "Update the build number in the SConstruct file"
-    update_file_version("SConstruct", "point\=[\d]+", "point="+build_num, source_path)
+        raise ValueError(f"SourcePath {source_path} is not a directory")
     
-# ADLMSDK_VERSION_POINT=6
-def updateVersion(build_num, source_path):
-    "Update the build number in the VERSION file"
-    update_file_version("VERSION", "ADLMSDK_VERSION_POINT=[\d]+", "ADLMSDK_VERSION_POINT="+build_num, source_path)
+    # Create version object (you can enhance this to parse from existing files)
+    return Config(    
+        source_path=source_path,
+        build_num=build_num
+    )
 
 
 def main():
     print("----Starting version update process...------")
     try:
-        build_num = _check_build_number()
-        source_path = _check_source_path()
+        config = create_config()
     except (ValueError, FileNotFoundError) as e:
         print(f"Error: {e}. Exiting...")
         sys.exit(1)
-    updateSconstruct(build_num, source_path)
-    updateVersion(build_num, source_path)
+    updateSconstruct(config)
+    updateVersion(config)
     print("----Version update process completed successfully----")
 
 
