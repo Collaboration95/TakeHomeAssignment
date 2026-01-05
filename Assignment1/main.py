@@ -29,14 +29,64 @@
 # return 0;
 # }
 
-def reverse_words(str):
-    return "racecar"
+def h_reverse_word(input_list:list, left:int, right:int)->list:
+    # Helper function to reverse specific substring in workd/ list 
+    while left < right:
+        input_list[left], input_list[right] = input_list[right], input_list[left]
+        left+=1
+        right-=1
+    return input_list
 
+def reverse_words(input_str:str)->str:
+    # 2p approach , modify in plac e
+    # convert string to list ( to simplify helper function 
+    #if character is alnum track until it is not then reverse the substring from left , right-1 ( right is not alnum character)
+    #convert to string at end 
+    left = 0
+    input_list = list(input_str)
+    length_of_input_list = len(input_list)
+    while left < length_of_input_list:
+        if not input_list[left].isalnum():
+            left+=1
+            continue
+        
+        right = left 
+        while right < length_of_input_list and input_list[right].isalnum():
+            right+=1
+        
+        h_reverse_word(input_list, left, right-1)
+        left = right
+    return ''.join(input_list)
 
 def main():
+    # Original test cases
     test_str = "racecar"
-    # test_str2 = "String; 2be reversed..."
+    test_str2 = "String; 2be reversed..."
     assert(reverse_words(test_str)=="racecar")
+    assert(reverse_words(test_str2)=="gnirtS; eb2 desrever...")    
+    assert(reverse_words("") == "")
+    assert(reverse_words("   ") == "   ")
+    assert(reverse_words("\t\n ") == "\t\n ")
+    assert(reverse_words("!@#$%") == "!@#$%")
+    assert(reverse_words("a") == "a")
+    assert(reverse_words("1") == "1")
+    assert(reverse_words("hello world") == "olleh dlrow")
+    assert(reverse_words("abc123!def") == "321cba!fed")
+    assert(reverse_words("a!b") == "a!b")
+    assert(reverse_words("123 456") == "321 654")
+    assert(reverse_words("Hello World") == "olleH dlroW")
+    assert(reverse_words("!hello") == "!olleh")
+    assert(reverse_words("hello!") == "olleh!")
+
+    # Consecutive punctuation
+    assert(reverse_words("hello!!world") == "olleh!!dlrow")
+
+    # Multiple spaces
+    assert(reverse_words("hello   world") == "olleh   dlrow")
+
+    # Mixed case and numbers
+    assert(reverse_words("Test123!Case456") == "321tseT!654esaC")
+
     print("All tests passed")
 
 
