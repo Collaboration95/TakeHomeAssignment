@@ -33,20 +33,20 @@ import sys
 # patch=0
 #)
 
-def update_file_version(filename,pattern,replacement):
+def update_file_version(filename,pattern,replacement, source_path):
     """Update the build number in the file"""
     print(f"Updating file: {filename}")
-    try:    
-        source_path = _check_source_path()
-    except (FileNotFoundError, ValueError) as e:
-        print(f"Error: {e}")
-        sys.exit(1)
 
     filepath = os.path.join(source_path,"develop","global","src",filename)
     # just following previous implementation
     temp_fp = os.path.join(source_path, "develop", "global", "src", filename + "1") 
-    os.chmod(filepath,0755)
-    print("File is chmoded")
+
+    if not os.path.exists(filepath):
+        print(f"Error: File not found: {filepath}")
+        sys.exit(1)
+    
+    os.chmod(filepath,0o755)
+
     with open( filepath, 'r') as fin:
         with open(temp_fp, 'w') as fout:
             for line in fin:
@@ -55,7 +55,7 @@ def update_file_version(filename,pattern,replacement):
     
     os.remove(filepath)
     os.rename(temp_fp, filepath)
-    print("Successfully updated file: {filename}")
+    print(f"Successfully updated file: {filename}")
     
 def _check_build_number():
     """Helper function to validate BuildNum variable"""
@@ -72,32 +72,35 @@ def _check_source_path():
     source_path = os.environ.get("SourcePath")
     if not source_path:
         raise ValueError("SourcePath environment variable is not set")
-    if not os.path.isdir(source_path):
-        raise ValueError("SourcePath environment variable is not a directory")
     if not os.path.exists(source_path):
         raise FileNotFoundError(f"Source path {source_path} not found")
+    if not os.path.isdir(source_path):
+        raise ValueError("SourcePath environment variable is not a directory")
     print(f"Source path is validated : {source_path}")
     return source_path
 
-def updateSconstruct(build_num):
+def updateSconstruct(build_num, source_path):
     "Update the build number in the SConstruct file"
-    update_file_version("SConstruct", "point\=[\d]+", "point="+build_num)
+    update_file_version("SConstruct", "point\=[\d]+", "point="+build_num, source_path)
     
 # ADLMSDK_VERSION_POINT=6
-def updateVersion(build_num):
+def updateVersion(build_num, source_path):
     "Update the build number in the VERSION file"
-    update_file_version("VERSION", "ADLMSDK_VERSION_POINT=[\d]+", "ADLMSDK_VERSION_POINT="+build_num)
+    update_file_version("VERSION", "ADLMSDK_VERSION_POINT=[\d]+", "ADLMSDK_VERSION_POINT="+build_num, source_path)
 
 
 def main():
     print("----Starting version update process...------")
     try:
         build_num = _check_build_number()
-    except ValueError as e:
-        print(f"Error: {e}")
+        source_path = _check_source_path()
+    except (ValueError, FileNotFoundError) as e:
+        print(f"Error: {e}. Exiting...")
         sys.exit(1)
-    updateSconstruct(build_num)
-    updateVersion(build_num)
+    updateSconstruct(build_num, source_path)
+    updateVersion(build_num, source_path)
     print("----Version update process completed successfully----")
 
-main()
+
+if __name__ == "__main__":
+    main()
