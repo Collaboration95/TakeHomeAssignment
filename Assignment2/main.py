@@ -24,6 +24,7 @@
 
 import os
 import re
+import sys
 # SCONSTRUCT file interesting lines
 # config.version = Version(
 # major=15,
@@ -34,15 +35,18 @@ import re
 
 def update_file_version(filename,pattern,replacement):
     """Update the build number in the file"""
-    source_path = _check_source_path()
+    print(f"Updating file: {filename}")
+    try:    
+        source_path = _check_source_path()
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
     filepath = os.path.join(source_path,"develop","global","src",filename)
     # just following previous implementation
     temp_fp = os.path.join(source_path, "develop", "global", "src", filename + "1") 
-    if not os.path.exists(filepath):
-        raise FileNotFoundError(f"File {filepath} not found")
     os.chmod(filepath,0755)
-
-    
+    print("File is chmoded")
     with open( filepath, 'r') as fin:
         with open(temp_fp, 'w') as fout:
             for line in fin:
@@ -51,6 +55,7 @@ def update_file_version(filename,pattern,replacement):
     
     os.remove(filepath)
     os.rename(temp_fp, filepath)
+    print("Successfully updated file: {filename}")
     
 def _check_build_number():
     """Helper function to validate BuildNum variable"""
@@ -59,6 +64,7 @@ def _check_build_number():
         raise ValueError("BuildNum environment variable is not set")
     if not build_num.isdigit():
         raise ValueError("BuildNum environment variable is not a number")
+    print(f"Build number: {build_num}")
     return build_num
 
 def _check_source_path():
@@ -66,6 +72,11 @@ def _check_source_path():
     source_path = os.environ.get("SourcePath")
     if not source_path:
         raise ValueError("SourcePath environment variable is not set")
+    if not os.path.isdir(source_path):
+        raise ValueError("SourcePath environment variable is not a directory")
+    if not os.path.exists(source_path):
+        raise FileNotFoundError(f"Source path {source_path} not found")
+    print(f"Source path is validated : {source_path}")
     return source_path
 
 def updateSconstruct(build_num):
@@ -79,8 +90,14 @@ def updateVersion(build_num):
 
 
 def main():
-    build_num = _check_build_number()
+    print("----Starting version update process...------")
+    try:
+        build_num = _check_build_number()
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
     updateSconstruct(build_num)
     updateVersion(build_num)
+    print("----Version update process completed successfully----")
 
 main()
