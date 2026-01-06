@@ -29,15 +29,10 @@
 # return 0;
 # }
 
-def h_reverse_word(input_list:list, left:int, right:int)->list:
+def h_reverse_word(input_list:list)->list:
     # Helper function to reverse specific substring in workd/ list
-    # create copy to avoid side effects ie pure function
-    result = input_list.copy() 
-    while left < right:
-        result[left], result[right] = result[right], result[left]
-        left+=1
-        right-=1
-    return result
+    # refactored left,right approach to juset use list reverse method
+    return input_list[::-1]
 
 def reverse_words(input_str:str)->str:
     # 2p approach , modify in plac e
@@ -56,7 +51,7 @@ def reverse_words(input_str:str)->str:
         while right < length_of_input_list and input_list[right].isalnum():
             right+=1
         
-        input_list = h_reverse_word(input_list, left, right-1)
+        input_list[left:right] = h_reverse_word(input_list[left:right])
         left = right
     return ''.join(input_list)
 
