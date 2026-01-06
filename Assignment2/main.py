@@ -27,6 +27,7 @@ import re
 import sys
 import uuid
 from dataclasses import dataclass
+import logging
 
 
 @dataclass
@@ -40,7 +41,7 @@ class Config:
 
 def update_file_version(filename,pattern,replacement, source_dir):
     """Update the build number in the file"""
-    print(f"Updating file: {filename}")
+    logging.info(f"Updating file: {filename}")
 
     filepath = os.path.join(source_dir,filename)
     # just following previous implementation
@@ -60,11 +61,11 @@ def update_file_version(filename,pattern,replacement, source_dir):
         
         os.remove(filepath)
         os.rename(temp_fp, filepath)
-        print(f"Successfully updated file: {filename}")
+        logging.info(f"Successfully updated file: {filename}")
     except Exception as e:
         if os.path.exists(temp_fp):
             os.remove(temp_fp)
-        print(f"Error updating file: {filename}. {e}")
+        logging.error(f"Error updating file: {filename}. {e}")
         sys.exit(1)
 
 def updateSconstruct(config: Config):
@@ -98,17 +99,20 @@ def create_config() -> Config:
         build_num=build_num
     )
 
+def setup_logging():
+    logging.basicConfig(filename='version_update.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
-    print("----Starting version update process...------")
+    setup_logging()
+    logging.info("----Starting version update process...------")
     try:
         config = create_config()
     except (ValueError, FileNotFoundError) as e:
-        print(f"Error: {e}. Exiting...")
+        logging.error(f"Error: {e}. Exiting...")
         sys.exit(1)
     updateSconstruct(config)
     updateVersion(config)
-    print("----Version update process completed successfully----")
+    logging.info("----Version update process completed successfully----")
 
 
 if __name__ == "__main__":
