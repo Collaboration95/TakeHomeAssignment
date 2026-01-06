@@ -30,12 +30,14 @@
 # }
 
 def h_reverse_word(input_list:list, left:int, right:int)->list:
-    # Helper function to reverse specific substring in workd/ list 
+    # Helper function to reverse specific substring in workd/ list
+    # create copy to avoid side effects ie pure function
+    result = input_list.copy() 
     while left < right:
-        input_list[left], input_list[right] = input_list[right], input_list[left]
+        result[left], result[right] = result[right], result[left]
         left+=1
         right-=1
-    return input_list
+    return result
 
 def reverse_words(input_str:str)->str:
     # 2p approach , modify in plac e
@@ -54,7 +56,7 @@ def reverse_words(input_str:str)->str:
         while right < length_of_input_list and input_list[right].isalnum():
             right+=1
         
-        h_reverse_word(input_list, left, right-1)
+        input_list = h_reverse_word(input_list, left, right-1)
         left = right
     return ''.join(input_list)
 
