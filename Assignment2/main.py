@@ -26,15 +26,15 @@ import os
 import re
 import sys
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import logging
 
 
 @dataclass
 class Config:
     source_path: str
-    source_dir: str  # computed property
     build_num: str
+    source_dir: str = field(init=False)  # computed property
 
     def __post_init__(self):
         self.source_dir = os.path.join(self.source_path, "develop", "global", "src")
@@ -110,6 +110,10 @@ def main():
     except (ValueError, FileNotFoundError) as e:
         logging.error(f"Error: {e}. Exiting...")
         sys.exit(1)
+        
+    # Printing debug information when testing debugscript
+    logging.debug(f"Config build number: {config.build_num}")
+    logging.debug(f"Source path: {config.source_path}")
     updateSconstruct(config)
     updateVersion(config)
     logging.info("----Version update process completed successfully----")
