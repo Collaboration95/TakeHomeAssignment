@@ -1,13 +1,36 @@
-.PHONY: cleanup A2
+.PHONY: cleanup A1 A2 source ready all
 
 cleanup:
-	@echo "Cleaning up Assignment2 for reruns..."
-	@rm -rf Assignment2/version_update.log
+	@echo "Cleaning up both assignments for reruns..."
+	@rm -rf Assignment1/*.log
+	@rm -rf Assignment2/Version_Update_Assignment2.log
 	@rm -rf Assignment2/sample_source
 	@rm -rf sample_source
 	@echo "Cleanup completed."
 
+ready:
+	@echo "Setting up Python virtual environment..."
+	@if [ ! -d ".venv" ]; then \
+		python3 -m venv .venv; \
+		echo "Virtual environment created."; \
+	else \
+		echo "Virtual environment already exists."; \
+	fi
+	@echo "Activating virtual environment and installing requirements..."
+	@. .venv/bin/activate && pip install --upgrade pip && pip install -r requirments.txt
+	@echo "Environment ready!"
+
+all:cleanup ready A1 A2
+
+A1:
+	@echo "----------------------------------------"
+	@echo "Running Assignment2 version update script..."
+	@cd Assignment1; \
+	python main.py
+	@echo "----------------------------------------"
+
 A2:
+	@echo "----------------------------------------"
 	@echo "Running Assignment2 version update script..."
 	@cd Assignment2; \
 	mkdir -p sample_source/develop/global/src; \
@@ -19,4 +42,5 @@ A2:
 	echo "---"; \
 	cat sample_source/develop/global/src/VERSION; \
 	echo "=== Log ==="; \
-	cat version_update.log
+	cat Version_Update_Assignment2.log
+	@echo "----------------------------------------"
