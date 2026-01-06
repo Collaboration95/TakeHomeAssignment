@@ -1,4 +1,4 @@
-# Take-Home Assignment
+# Take-Home Assignment - Guruprasath Gopal
 
 This repository contains solutions to a take-home programming assignment with two distinct problems, implemented in Python.
 
@@ -114,7 +114,7 @@ The solution uses an in-place modification approach with O(n) time complexity, w
 
 ## Optimizations and Improvements
 
-From the Original "Intern's" code , the following improvemetns were done to ensure production quality code
+From the Original `Intern's code` , the following improvements were done to ensure production quality code
 
 ### Memory Optimizations
 
