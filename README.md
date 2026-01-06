@@ -11,7 +11,7 @@ TakeHomeAssignment/
 ├── Assignment2/
 │   └── main.py          # Version update script
 ├── Makefile            # Build and run commands
-├── requirments.txt     # Python dependencies (empty)
+├── requirements.txt     # Python dependencies (empty)
 └── README.md         -> You are here !!!!
 ```
 
@@ -133,7 +133,7 @@ From the Original `Intern's code` , the following improvements were done to ensu
 - **Race Condition Fix**: Fixed issue where original files were deleted before temporary files were validated
 - **UUID for File Safety**: Added unique identifiers to temporary files to prevent path conflicts
 - **Input Validation**: Added validation for environment variables and file paths
-- **Dependency Injection**: Refactored to call `_check_source_path()` once and inject dependencies
+- **Dependency Injection**: Refactored to call `create_config()` once and inject dependencies
 
 ### Performance Optimizations
 

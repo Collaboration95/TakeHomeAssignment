@@ -30,15 +30,15 @@
 # }
 
 def h_reverse_word(input_list:list)->list:
-    # Helper function to reverse specific substring in workd/ list
-    # refactored left,right approach to juset use list reverse method
+    # Helper function to reverse specific substring in word/list
+    # refactored left,right approach to just use list reverse method
     return input_list[::-1]
 
 def reverse_words(input_str:str)->str:
-    # 2p approach , modify in plac e
-    # convert string to list ( to simplify helper function 
-    #if character is alnum track until it is not then reverse the substring from left , right-1 ( right is not alnum character)
-    #convert to string at end 
+    # 2p approach, modify in place
+    # convert string to list (to simplify helper function)
+    # if character is alnum track until it is not then reverse the substring from left, right-1 (right is not alnum character)
+    # convert to string at end 
     left = 0
     input_list = list(input_str)
     length_of_input_list = len(input_list)

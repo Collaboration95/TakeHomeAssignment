@@ -61,8 +61,7 @@ def update_file_version(filename,pattern,replacement, source_dir):
                     total_replacements += count
                     fout.write(line)
         
-        os.remove(filepath)
-        os.rename(temp_fp, filepath)
+        os.replace(temp_fp, filepath)  # Atomic operation
         logging.info(f"Successfully updated file: {filename} ({total_replacements} replacements made)")
     except Exception as e:
         if os.path.exists(temp_fp):
@@ -72,12 +71,12 @@ def update_file_version(filename,pattern,replacement, source_dir):
 
 def updateSconstruct(config: Config):
     "Update the build number in the SConstruct file"
-    update_file_version("SConstruct", "point\=[\d]+,", "point="+config.build_num, config.source_dir)
+    update_file_version("SConstruct", "point\=[\d]+,", "point="+config.build_num+",", config.source_dir)
     
 # ADLMSDK_VERSION_POINT=6
 def updateVersion(config: Config):
     "Update the build number in the VERSION file"
-    update_file_version("VERSION", "ADLMSDK_VERSION_POINT= [\d]+", "ADLMSDK_VERSION_POINT="+config.build_num, config.source_dir)
+    update_file_version("VERSION", "ADLMSDK_VERSION_POINT= [\d]+", "ADLMSDK_VERSION_POINT= "+config.build_num, config.source_dir)
 
 def create_config() -> Config:
     """Create and validate configuration from environment variables."""

@@ -17,14 +17,14 @@ ready:
 		echo "Virtual environment already exists."; \
 	fi
 	@echo "Activating virtual environment and installing requirements..."
-	@. .venv/bin/activate && pip install --upgrade pip && pip install -r requirments.txt
+	@. .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
 	@echo "Environment ready!"
 
 all:cleanup ready A1 A2
 
 A1:
 	@echo "----------------------------------------"
-	@echo "Running Assignment2 version update script..."
+	@echo "Running Assignment1 word reversal script..."
 	@cd Assignment1; \
 	python main.py
 	@echo "----------------------------------------"
