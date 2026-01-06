@@ -53,15 +53,17 @@ def update_file_version(filename,pattern,replacement, source_dir):
     
     os.chmod(filepath,0o755)
     try:
+        total_replacements = 0
         with open( filepath, 'r') as fin:
             with open(temp_fp, 'w') as fout:
                 for line in fin:
-                    line = re.sub(pattern, replacement, line)
+                    line, count = re.subn(pattern, replacement, line)
+                    total_replacements += count
                     fout.write(line)
         
         os.remove(filepath)
         os.rename(temp_fp, filepath)
-        logging.info(f"Successfully updated file: {filename}")
+        logging.info(f"Successfully updated file: {filename} ({total_replacements} replacements made)")
     except Exception as e:
         if os.path.exists(temp_fp):
             os.remove(temp_fp)
@@ -93,14 +95,13 @@ def create_config() -> Config:
     if not os.path.isdir(source_path):
         raise ValueError(f"SourcePath {source_path} is not a directory")
     
-    # Create version object (you can enhance this to parse from existing files)
     return Config(    
         source_path=source_path,
         build_num=build_num
     )
 
 def setup_logging():
-    logging.basicConfig(filename='version_update.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(filename='Version_Update_Assignment2.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
     setup_logging()
